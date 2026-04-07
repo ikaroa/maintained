@@ -2,16 +2,16 @@
  * Joblogic API Client
  * Integrates with the Joblogic Field Service Management REST API.
  * Docs: https://apidocs.joblogic.com/
+ *
+ * Auth: OAuth 2.0 Client Credentials
+ * API version: v1
+ * All search endpoints use POST /GetAll
+ * All endpoints require tenantId query parameter
  */
 
-const BASE_URL = process.env.JOBLOGIC_API_BASE_URL || "https://api.joblogic.com";
-
-interface JoblogicConfig {
-  apiKey?: string;
-  username?: string;
-  password?: string;
-  token?: string;
-}
+const API_BASE_URL = process.env.JOBLOGIC_API_BASE_URL || "https://uatapi.joblogic.com";
+const IDENTITY_URL = process.env.JOBLOGIC_IDENTITY_URL || "https://uatidentityserver.joblogic.com";
+const TENANT_ID = process.env.JOBLOGIC_TENANT_ID || "";
 
 let cachedToken: { value: string; expiresAt: number } | null = null;
 
@@ -20,13 +20,17 @@ async function getAuthToken(): Promise<string> {
     return cachedToken.value;
   }
 
-  const res = await fetch(`${BASE_URL}/api/v2/authentication/token`, {
+  const body = new URLSearchParams({
+    grant_type: "client_credentials",
+    client_id: process.env.JOBLOGIC_CLIENT_ID || "",
+    client_secret: process.env.JOBLOGIC_CLIENT_SECRET || "",
+    scope: "JL.Api",
+  });
+
+  const res = await fetch(`${IDENTITY_URL}/connect/token`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      UserName: process.env.JOBLOGIC_USERNAME,
-      Password: process.env.JOBLOGIC_PASSWORD,
-    }),
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: body.toString(),
   });
 
   if (!res.ok) {
@@ -34,16 +38,29 @@ async function getAuthToken(): Promise<string> {
   }
 
   const data = await res.json();
+  // Token lifetime varies; refresh 5 minutes before expiry
+  const expiresIn = (data.expires_in || 3600) * 1000;
   cachedToken = {
-    value: data.Token || data.token,
-    expiresAt: Date.now() + 55 * 60 * 1000, // refresh 5 min early
+    value: data.access_token,
+    expiresAt: Date.now() + expiresIn - 5 * 60 * 1000,
   };
   return cachedToken.value;
 }
 
-async function joblogicFetch(path: string, options: RequestInit = {}): Promise<unknown> {
+function withTenant(path: string, extraParams?: Record<string, string>): string {
+  const url = new URL(`${API_BASE_URL}/api/v1${path}`);
+  url.searchParams.set("tenantId", TENANT_ID);
+  if (extraParams) {
+    for (const [k, v] of Object.entries(extraParams)) {
+      url.searchParams.set(k, v);
+    }
+  }
+  return url.toString();
+}
+
+async function joblogicFetch(fullUrl: string, options: RequestInit = {}): Promise<unknown> {
   const token = await getAuthToken();
-  const res = await fetch(`${BASE_URL}${path}`, {
+  const res = await fetch(fullUrl, {
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -63,95 +80,127 @@ async function joblogicFetch(path: string, options: RequestInit = {}): Promise<u
 // ---- Jobs ----
 
 export async function getJob(jobId: string | number) {
-  return joblogicFetch(`/api/v2/jobs/${jobId}`);
+  // Integer ID lookup
+  const url = withTenant("/Job/GetById", { Id: String(jobId), includeAdditionalDetails: "true" });
+  return joblogicFetch(url);
 }
 
-export async function getJobs(params?: { page?: number; pageSize?: number; status?: string }) {
-  const query = new URLSearchParams();
-  if (params?.page) query.set("page", String(params.page));
-  if (params?.pageSize) query.set("pageSize", String(params.pageSize));
-  if (params?.status) query.set("status", params.status);
-  return joblogicFetch(`/api/v2/jobs?${query}`);
+export async function getJobByUniqueId(uniqueId: string) {
+  const url = withTenant("/Job", { id: uniqueId, includeAdditionalDetails: "true" });
+  return joblogicFetch(url);
 }
 
-export async function getJobsByCustomer(customerId: string | number) {
-  return joblogicFetch(`/api/v2/jobs?customerId=${customerId}`);
+export async function searchJobs(keyword?: string, status?: string) {
+  const url = withTenant("/Job/getall");
+  return joblogicFetch(url, {
+    method: "POST",
+    body: JSON.stringify({
+      keyword: keyword || "",
+      ...(status ? { status } : {}),
+    }),
+  });
 }
 
 // ---- Invoices ----
 
 export async function getInvoice(invoiceId: string | number) {
-  return joblogicFetch(`/api/v2/invoices/${invoiceId}`);
+  const url = withTenant("/Invoice/GetById", { id: String(invoiceId) });
+  return joblogicFetch(url);
 }
 
-export async function getInvoices(params?: { page?: number; pageSize?: number }) {
-  const query = new URLSearchParams();
-  if (params?.page) query.set("page", String(params.page));
-  if (params?.pageSize) query.set("pageSize", String(params.pageSize));
-  return joblogicFetch(`/api/v2/invoices?${query}`);
+export async function searchInvoices(keyword?: string) {
+  const url = withTenant("/Invoice/getall");
+  return joblogicFetch(url, {
+    method: "POST",
+    body: JSON.stringify({ keyword: keyword || "" }),
+  });
 }
 
-// ---- Estimates / Quotes ----
+// ---- Quotes / Estimates ----
 
-export async function getEstimate(estimateId: string | number) {
-  return joblogicFetch(`/api/v2/estimates/${estimateId}`);
+export async function getQuote(quoteId: string | number) {
+  const url = withTenant("/Quote/GetById", { Id: String(quoteId), includeLines: "true" });
+  return joblogicFetch(url);
 }
 
-export async function getEstimates(params?: { page?: number; pageSize?: number }) {
-  const query = new URLSearchParams();
-  if (params?.page) query.set("page", String(params.page));
-  if (params?.pageSize) query.set("pageSize", String(params.pageSize));
-  return joblogicFetch(`/api/v2/estimates?${query}`);
+export async function searchQuotes(keyword?: string) {
+  const url = withTenant("/Quote/GetAll");
+  return joblogicFetch(url, {
+    method: "POST",
+    body: JSON.stringify({ keyword: keyword || "" }),
+  });
 }
 
 // ---- Customers ----
 
 export async function getCustomer(customerId: string | number) {
-  return joblogicFetch(`/api/v2/customers/${customerId}`);
+  const url = withTenant("/Customer/GetById", { id: String(customerId) });
+  return joblogicFetch(url);
 }
 
-export async function getCustomers(params?: { page?: number; pageSize?: number; search?: string }) {
-  const query = new URLSearchParams();
-  if (params?.page) query.set("page", String(params.page));
-  if (params?.pageSize) query.set("pageSize", String(params.pageSize));
-  if (params?.search) query.set("search", params.search);
-  return joblogicFetch(`/api/v2/customers?${query}`);
+export async function getCustomerByUniqueId(uniqueId: string) {
+  const url = withTenant("/Customer", { id: uniqueId });
+  return joblogicFetch(url);
 }
 
-// ---- Work Orders ----
-
-export async function getWorkOrder(workOrderId: string | number) {
-  return joblogicFetch(`/api/v2/workorders/${workOrderId}`);
-}
-
-export async function getWorkOrders(params?: { page?: number; pageSize?: number }) {
-  const query = new URLSearchParams();
-  if (params?.page) query.set("page", String(params.page));
-  if (params?.pageSize) query.set("pageSize", String(params.pageSize));
-  return joblogicFetch(`/api/v2/workorders?${query}`);
+export async function searchCustomers(keyword: string) {
+  const url = withTenant("/Customer/GetAll");
+  return joblogicFetch(url, {
+    method: "POST",
+    body: JSON.stringify({ keyword }),
+  });
 }
 
 // ---- Assets ----
 
 export async function getAsset(assetId: string | number) {
-  return joblogicFetch(`/api/v2/assets/${assetId}`);
+  const url = withTenant("/Asset/GetById", { Id: String(assetId) });
+  return joblogicFetch(url);
 }
 
-export async function getAssets(params?: { page?: number; pageSize?: number }) {
-  const query = new URLSearchParams();
-  if (params?.page) query.set("page", String(params.page));
-  if (params?.pageSize) query.set("pageSize", String(params.pageSize));
-  return joblogicFetch(`/api/v2/assets?${query}`);
+export async function searchAssets(keyword?: string) {
+  const url = withTenant("/Asset/GetAll");
+  return joblogicFetch(url, {
+    method: "POST",
+    body: JSON.stringify({ keyword: keyword || "" }),
+  });
 }
 
 // ---- Engineers ----
 
 export async function getEngineer(engineerId: string | number) {
-  return joblogicFetch(`/api/v2/engineers/${engineerId}`);
+  const url = withTenant("/Engineer/GetById", { Id: String(engineerId) });
+  return joblogicFetch(url);
 }
 
-export async function getEngineers() {
-  return joblogicFetch(`/api/v2/engineers`);
+export async function searchEngineers(keyword?: string) {
+  const url = withTenant("/Engineer/GetAll");
+  return joblogicFetch(url, {
+    method: "POST",
+    body: JSON.stringify({ keyword: keyword || "" }),
+  });
+}
+
+// ---- Sites ----
+
+export async function getSite(siteId: string | number) {
+  const url = withTenant("/Site/GetById", { Id: String(siteId) });
+  return joblogicFetch(url);
+}
+
+export async function searchSites(keyword: string) {
+  const url = withTenant("/Site/GetAll");
+  return joblogicFetch(url, {
+    method: "POST",
+    body: JSON.stringify({ keyword }),
+  });
+}
+
+// ---- Visits ----
+
+export async function getVisit(visitId: string | number) {
+  const url = withTenant("/Visit/GetById", { Id: String(visitId) });
+  return joblogicFetch(url);
 }
 
 /**
@@ -169,19 +218,19 @@ export async function resolveQuery(intent: string, entities: Record<string, stri
       return { error: "I need an invoice number to look that up." };
 
     case "get_estimate":
-      if (entities.estimateId) return getEstimate(entities.estimateId);
-      return { error: "I need an estimate number to look that up." };
+      if (entities.estimateId) return getQuote(entities.estimateId);
+      return { error: "I need a quote or estimate number to look that up." };
 
     case "get_customer":
       if (entities.customerId) return getCustomer(entities.customerId);
-      if (entities.customerName) return getCustomers({ search: entities.customerName });
+      if (entities.customerName) return searchCustomers(entities.customerName);
       return { error: "I need a customer name or ID." };
 
     case "list_jobs":
-      return getJobs({ pageSize: 10, status: entities.status });
+      return searchJobs(entities.keyword, entities.status);
 
     case "list_invoices":
-      return getInvoices({ pageSize: 10 });
+      return searchInvoices(entities.keyword);
 
     case "get_asset":
       if (entities.assetId) return getAsset(entities.assetId);
@@ -189,9 +238,14 @@ export async function resolveQuery(intent: string, entities: Record<string, stri
 
     case "get_engineer":
       if (entities.engineerId) return getEngineer(entities.engineerId);
-      return getEngineers();
+      return searchEngineers(entities.keyword);
+
+    case "get_site":
+      if (entities.siteId) return getSite(entities.siteId);
+      if (entities.siteName) return searchSites(entities.siteName);
+      return { error: "I need a site name or ID." };
 
     default:
-      return { error: "I'm not sure how to help with that. Try asking about a job, invoice, estimate, or customer." };
+      return { error: "I'm not sure how to help with that. Try asking about a job, invoice, quote, customer, or asset." };
   }
 }
