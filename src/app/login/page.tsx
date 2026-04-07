@@ -5,17 +5,14 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
+  const [phase, setPhase] = useState<"landing" | "form">("landing");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  async function handleSSO() {
-    await signIn("sso", { callbackUrl: "/" });
-  }
-
-  async function handleCredentials(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError("");
@@ -35,7 +32,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <div className="relative min-h-screen flex flex-col items-center overflow-hidden">
       {/* Splash video background */}
       <video
         autoPlay
@@ -47,77 +44,105 @@ export default function LoginPage() {
         <source src="/splash.mp4" type="video/mp4" />
       </video>
 
-      {/* Dark overlay */}
-      <div className="absolute inset-0 bg-brand-black/70" />
+      {/* Overlay */}
+      <div className={`absolute inset-0 transition-all duration-1000 ease-out ${
+        phase === "form"
+          ? "bg-brand-black/85"
+          : "bg-gradient-to-t from-brand-black via-brand-black/50 to-transparent"
+      }`} />
 
-      {/* Login card */}
-      <div className="relative z-10 w-full max-w-sm space-y-8 p-8 rounded-2xl bg-brand-black/60 backdrop-blur-xl border border-white/10">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-white tracking-[0.2em] uppercase">Maintained</h1>
-          <p className="mt-2 text-brand-aqua text-sm tracking-widest uppercase">Beyond Maintenance</p>
+      {/*
+        Single content block: logo + form + button all together.
+        In "landing": positioned at center (top: 50%) with button below.
+        In "form": slides up to ~35% and reveals form fields.
+      */}
+      <div
+        className="fixed z-10 w-full max-w-sm px-8 left-1/2 transition-all duration-700 ease-out"
+        style={{
+          top: "50%",
+          transform: "translateX(-50%) translateY(-50%)",
+        }}
+      >
+        {/* Logo */}
+        <div className="text-center mb-10">
+          <img
+            src="/logo.svg"
+            alt="Maintained"
+            className={`mx-auto brightness-0 invert transition-all duration-700 ${
+              phase === "form" ? "h-8" : "h-11"
+            }`}
+          />
         </div>
 
-        {/* SSO Button */}
-        <button
-          onClick={handleSSO}
-          className="w-full flex items-center justify-center gap-3 rounded-lg bg-brand-gold px-4 py-3 text-brand-black font-medium hover:bg-brand-gold/80 transition-colors"
+        {/* Form fields — height animates in */}
+        <div
+          className={`transition-all duration-700 ease-out overflow-hidden ${
+            phase === "form"
+              ? "max-h-[500px] opacity-100 mb-0"
+              : "max-h-0 opacity-0 mb-0"
+          }`}
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-          </svg>
-          Sign in with SSO
-        </button>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoFocus={phase === "form"}
+                className="w-full rounded-full border border-white/15 bg-white/10 px-5 py-3 text-white placeholder-white/40 focus:border-brand-aqua focus:ring-1 focus:ring-brand-aqua outline-none backdrop-blur-sm text-sm"
+                placeholder="Email address"
+              />
+            </div>
+            <div>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full rounded-full border border-white/15 bg-white/10 px-5 py-3 text-white placeholder-white/40 focus:border-brand-aqua focus:ring-1 focus:ring-brand-aqua outline-none backdrop-blur-sm text-sm"
+                placeholder="Password"
+              />
+            </div>
 
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-white/20" />
-          </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-4 bg-brand-black/60 text-gray-400">or</span>
-          </div>
+            {error && (
+              <p className="text-red-400 text-sm text-center">{error}</p>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full rounded-full bg-brand-gold px-6 py-3.5 text-brand-black font-semibold text-sm uppercase tracking-widest hover:bg-brand-gold/80 transition-colors disabled:opacity-50"
+            >
+              {loading ? "Signing in..." : "Sign in"}
+            </button>
+
+            <div className="text-center">
+              <button
+                type="button"
+                className="text-white/40 text-xs hover:text-white/70 transition-colors"
+              >
+                Forgot password?
+              </button>
+            </div>
+          </form>
         </div>
+      </div>
 
-        {/* Credentials Form */}
-        <form onSubmit={handleCredentials} className="space-y-4">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-brand-cream/80">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="mt-1 w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-white placeholder-gray-500 focus:border-brand-aqua focus:ring-1 focus:ring-brand-aqua outline-none backdrop-blur"
-              placeholder="you@maintained.com"
-            />
-          </div>
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-brand-cream/80">
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="mt-1 w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-white placeholder-gray-500 focus:border-brand-aqua focus:ring-1 focus:ring-brand-aqua outline-none backdrop-blur"
-              placeholder="Enter password"
-            />
-          </div>
-
-          {error && <p className="text-red-400 text-sm">{error}</p>}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-lg bg-brand-cream px-4 py-2.5 text-brand-black font-medium hover:bg-white transition-colors disabled:opacity-50"
-          >
-            {loading ? "Signing in..." : "Sign in"}
-          </button>
-        </form>
+      {/* Landing: Sign In button pinned to bottom */}
+      <div className={`relative z-10 w-full max-w-sm px-8 mt-auto pb-16 transition-all duration-500 ease-out ${
+        phase === "landing"
+          ? "opacity-100 translate-y-0"
+          : "opacity-0 translate-y-10 pointer-events-none"
+      }`}>
+        <button
+          onClick={() => setPhase("form")}
+          className="w-full rounded-full bg-brand-gold px-6 py-3.5 text-brand-black font-semibold text-sm uppercase tracking-widest hover:bg-brand-gold/80 transition-colors"
+        >
+          Sign in
+        </button>
       </div>
     </div>
   );

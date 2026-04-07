@@ -60,8 +60,7 @@ export default function ReportsPage() {
     <div className="min-h-screen bg-brand-black text-white">
       <header className="border-b border-brand-blue px-6 py-4 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold">MAINTAINED</h1>
-          <p className="text-sm text-gray-400">Daily Reports</p>
+          <img src="/logo.svg" alt="Maintained" className="h-6 brightness-0 invert" />
         </div>
         <div className="flex items-center gap-4">
           <a href="/" className="text-sm text-gray-400 hover:text-white transition-colors">
