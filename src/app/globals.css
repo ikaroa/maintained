@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+:root {
+  /* Maintained Brand Colors */
+  --maintained-black: #201F1A;
+  --maintained-blue: #1A323F;
+  --maintained-aqua: #ABCBD1;
+  --maintained-gold: #CDB068;
+  --maintained-grey: #DFDEDE;
+  --maintained-cream: #FDFCF9;
+
+  --background: var(--maintained-black);
+  --foreground: var(--maintained-cream);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-brand-black: #201F1A;
+  --color-brand-blue: #1A323F;
+  --color-brand-aqua: #ABCBD1;
+  --color-brand-gold: #CDB068;
+  --color-brand-grey: #DFDEDE;
+  --color-brand-cream: #FDFCF9;
+  --font-sans: var(--font-poppins);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-poppins), Arial, Helvetica, sans-serif;
+}
