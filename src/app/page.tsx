@@ -102,29 +102,35 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Header */}
-      <header className="relative z-[60] px-6 pt-16 pb-2 flex items-start justify-between">
-        <div className="animate-fade-slide-up">
-          <p className="text-sm text-brand-black/40 font-medium">{getGreeting()}</p>
-          <h1 className="text-[26px] font-semibold tracking-tight text-brand-black mt-0.5">
-            {userName}
-          </h1>
-        </div>
-        <div className="flex items-center gap-2 mt-1">
-          <button className="relative w-10 h-10 flex items-center justify-center rounded-2xl bg-white shadow-sm shadow-black/[0.04] active:scale-95 transition-transform">
-            <svg className="w-[18px] h-[18px] text-brand-black/50" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
-            </svg>
-            <span className="absolute top-2 right-2 w-2 h-2 bg-brand-gold rounded-full" />
-          </button>
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white shadow-sm shadow-black/[0.04] active:scale-95 transition-transform z-[60] relative"
-          >
-            <AnimatedMenuIcon isOpen={menuOpen} className="w-5 h-5 text-brand-black/50" />
-          </button>
-        </div>
+      {/* Top bar: menu + logo + actions */}
+      <header className="relative z-[60] px-5 pt-12 pb-0 flex items-center justify-between">
+        <button
+          onClick={() => setMenuOpen(!menuOpen)}
+          className="w-9 h-9 flex items-center justify-center rounded-xl active:scale-95 transition-transform z-[60] relative"
+        >
+          <AnimatedMenuIcon isOpen={menuOpen} className={`w-5 h-5 transition-colors duration-500 ${menuOpen ? "text-white" : "text-brand-blue"}`} />
+        </button>
+        <img
+          src="/logo.svg"
+          alt="Maintained"
+          className={`h-[18px] transition-all duration-500 ${menuOpen ? "brightness-0 invert" : ""}`}
+          style={menuOpen ? undefined : { filter: "brightness(0) saturate(100%) invert(17%) sepia(20%) saturate(1200%) hue-rotate(160deg) brightness(95%) contrast(95%)" }}
+        />
+        <button className={`relative w-9 h-9 flex items-center justify-center rounded-xl active:scale-95 transition-all duration-500 ${menuOpen ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
+          <svg className="w-[18px] h-[18px] text-brand-blue/60" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+          </svg>
+          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-brand-gold rounded-full" />
+        </button>
       </header>
+
+      {/* Greeting */}
+      <div className="px-6 pt-3 pb-2 animate-fade-slide-up">
+        <p className="text-sm text-brand-black/40 font-medium">{getGreeting()}</p>
+        <h1 className="text-[26px] font-semibold tracking-tight text-brand-black mt-0.5">
+          {userName}
+        </h1>
+      </div>
 
       {/* Cards */}
       <div className="flex-1 px-5 pt-6 space-y-4 stagger">

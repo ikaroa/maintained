@@ -74,30 +74,50 @@ export default function TabBar({ onOrbPress, isListening, isProcessing }: TabBar
   const orbSpeed = isListening ? 4 : isProcessing ? 8 : 20;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-30 safe-bottom">
-      <div className="absolute inset-0 bg-white/80 backdrop-blur-2xl border-t border-brand-black/[0.04]" />
+    <div className="fixed bottom-0 left-0 right-0 z-30 safe-bottom" style={{ height: "90px" }}>
+      {/* Background with curved notch — using clip-path for clean rendering */}
+      <div className="absolute inset-0">
+        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 90" preserveAspectRatio="none">
+          <defs>
+            <filter id="tabShadow">
+              <feDropShadow dx="0" dy="-1" stdDeviation="3" floodColor="#201F1A" floodOpacity="0.06" />
+            </filter>
+          </defs>
+          <path
+            d="M0,24 L156,24 Q168,24 175,30 Q184,38 200,38 Q216,38 225,30 Q232,24 244,24 L400,24 L400,90 L0,90 Z"
+            fill="white"
+            fillOpacity="0.95"
+            filter="url(#tabShadow)"
+          />
+        </svg>
+        <div className="absolute bottom-0 left-0 right-0 h-[66px] bg-white/95 backdrop-blur-2xl" />
+      </div>
 
-      <div className="relative flex items-end justify-around px-2 pb-7 pt-2">
-        {tabs.map((tab, i) => {
+      {/* Center orb — nestled into the curve */}
+      <div className="absolute left-1/2 -translate-x-1/2 top-[6px] z-10">
+        <button
+          onClick={onOrbPress}
+          className="relative active:scale-90 transition-transform duration-200"
+        >
+          <div className={`absolute -inset-1 rounded-full transition-all duration-500 ${
+            isListening ? "bg-brand-aqua/20 blur-lg opacity-100" : "opacity-0"
+          }`} />
+          <div className="absolute -inset-[2px] rounded-full bg-white shadow-md shadow-brand-black/8" />
+          <div className="relative rounded-full overflow-hidden">
+            <SiriOrb
+              size="48px"
+              colors={orbColors}
+              animationDuration={orbSpeed}
+            />
+          </div>
+        </button>
+      </div>
+
+      {/* Tab items — evenly spaced with proper gap for orb */}
+      <div className="absolute bottom-0 left-0 right-0 h-[66px] flex items-center justify-around px-4">
+        {tabs.map((tab) => {
           if (tab.href === "__orb__") {
-            return (
-              <button
-                key="orb"
-                onClick={onOrbPress}
-                className={`relative -mt-7 active:scale-95 transition-transform duration-200`}
-              >
-                <div className={`absolute -inset-2 rounded-full blur-xl transition-all duration-500 ${
-                  isListening ? "bg-brand-aqua/20 opacity-100" : "bg-brand-gold/10 opacity-60"
-                }`} />
-                <div className="relative rounded-full shadow-lg shadow-brand-black/10">
-                  <SiriOrb
-                    size="52px"
-                    colors={orbColors}
-                    animationDuration={orbSpeed}
-                  />
-                </div>
-              </button>
-            );
+            return <div key="orb-spacer" className="w-[60px]" />;
           }
 
           const isActive = pathname === tab.href;
@@ -105,12 +125,14 @@ export default function TabBar({ onOrbPress, isListening, isProcessing }: TabBar
             <Link
               key={tab.href}
               href={tab.href}
-              className={`flex flex-col items-center gap-1 min-w-[52px] py-1.5 transition-colors active:scale-95 ${
-                isActive ? "text-brand-blue" : "text-brand-black/30"
+              className={`flex flex-col items-center gap-1 min-w-[56px] active:scale-90 transition-all duration-200 ${
+                isActive ? "text-brand-blue" : "text-brand-black/25"
               }`}
             >
               {tab.icon(isActive)}
-              <span className={`text-[10px] font-medium ${isActive ? "text-brand-blue" : "text-brand-black/30"}`}>{tab.label}</span>
+              <span className={`text-[10px] font-medium leading-none ${isActive ? "text-brand-blue" : "text-brand-black/25"}`}>
+                {tab.label}
+              </span>
             </Link>
           );
         })}
