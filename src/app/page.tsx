@@ -137,13 +137,13 @@ export default function HomePage() {
           <h3 className="text-[13px] font-semibold text-brand-black/50 uppercase tracking-wider mb-4 px-1">Maintain Your Home</h3>
           <div className="flex gap-5 overflow-x-auto pb-3 -mx-1 px-1 scrollbar-hide">
             {[
-              { label: "Plumbing", gradient: "from-brand-blue/[0.08] to-brand-aqua/[0.12]", icon: "M11.42 15.17l-5.84-3.38a1 1 0 01-.08-1.69l9.82-5.72a1 1 0 011.34.47l3.54 7.08a1 1 0 01-.47 1.34l-9.82 5.72a1 1 0 01-1.34-.47z" },
-              { label: "Electrical", gradient: "from-brand-gold/[0.12] to-brand-gold/[0.05]", icon: "M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" },
-              { label: "Cleaning", gradient: "from-brand-aqua/[0.12] to-brand-blue/[0.06]", icon: "M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" },
-              { label: "AC Service", gradient: "from-brand-blue/[0.06] to-brand-aqua/[0.08]", icon: "M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" },
-              { label: "Painting", gradient: "from-brand-gold/[0.08] to-brand-cream", icon: "M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128z" },
+              { label: "Plumbing", id: "plumbing", gradient: "from-brand-blue/[0.08] to-brand-aqua/[0.12]", icon: "M11.42 15.17l-5.84-3.38a1 1 0 01-.08-1.69l9.82-5.72a1 1 0 011.34.47l3.54 7.08a1 1 0 01-.47 1.34l-9.82 5.72a1 1 0 01-1.34-.47z" },
+              { label: "Electrical", id: "electrical", gradient: "from-brand-gold/[0.12] to-brand-gold/[0.05]", icon: "M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" },
+              { label: "Cleaning", id: "cleaning", gradient: "from-brand-aqua/[0.12] to-brand-blue/[0.06]", icon: "M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" },
+              { label: "AC Service", id: "ac", gradient: "from-brand-blue/[0.06] to-brand-aqua/[0.08]", icon: "M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" },
+              { label: "Painting", id: "painting", gradient: "from-brand-gold/[0.08] to-brand-cream", icon: "M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128z" },
             ].map((item) => (
-              <Link key={item.label} href="/services" className="flex flex-col items-center gap-2.5 shrink-0 active:scale-95 transition-transform">
+              <Link key={item.label} href={`/services?book=${item.id}`} className="flex flex-col items-center gap-2.5 shrink-0 active:scale-95 transition-transform">
                 <div className={`w-[72px] h-[72px] rounded-full bg-gradient-to-br ${item.gradient} flex items-center justify-center shadow-sm shadow-black/[0.02]`}>
                   <svg className="w-6 h-6 text-brand-blue/40" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />

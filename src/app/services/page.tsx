@@ -3,6 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import TabBar from "@/components/ui/tab-bar";
 import TopBar from "@/components/ui/top-bar";
 import VoiceOverlay from "@/components/voice-overlay";
@@ -66,9 +67,11 @@ const mockBookings: Booking[] = [
 export default function ServicesPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [voiceOpen, setVoiceOpen] = useState(false);
   const [tab, setTab] = useState<"browse" | "bookings">("browse");
   const [selectedService, setSelectedService] = useState<typeof services[0] | null>(null);
+  const [didAutoOpen, setDidAutoOpen] = useState(false);
   const [bookingStep, setBookingStep] = useState<"detail" | "schedule" | "confirm" | "success">("detail");
   const [selectedProperty, setSelectedProperty] = useState(properties[0].id);
   const [selectedDate, setSelectedDate] = useState<string>("");
@@ -77,6 +80,20 @@ export default function ServicesPage() {
   const [scheduleData] = useState(generateSlots);
 
   useEffect(() => { if (status === "unauthenticated") router.push("/login"); }, [status, router]);
+
+  // Auto-open service from query param (e.g. /services?book=plumbing)
+  useEffect(() => {
+    if (!didAutoOpen && searchParams) {
+      const bookId = searchParams.get("book");
+      if (bookId) {
+        const service = services.find(s => s.id === bookId);
+        if (service) {
+          setSelectedService(service);
+          setDidAutoOpen(true);
+        }
+      }
+    }
+  }, [searchParams, didAutoOpen]);
   if (status === "loading" || !session) return null;
 
   function handleBook() {

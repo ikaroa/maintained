@@ -79,7 +79,9 @@ export default function TopBar() {
       <header className="relative z-[60] px-5 pt-3 pb-0 flex items-center justify-between">
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className="w-9 h-9 flex items-center justify-center rounded-xl active:scale-95 transition-transform z-[60] relative"
+          className={`w-9 h-9 flex items-center justify-center rounded-xl active:scale-95 transition-all duration-500 z-[60] relative ${
+            menuOpen ? "text-white" : "text-brand-blue"
+          }`}
         >
           <AnimatedMenuIcon isOpen={menuOpen} />
         </button>
