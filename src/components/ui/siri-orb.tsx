@@ -20,12 +20,12 @@ const SiriOrb: React.FC<SiriOrbProps> = ({
   colors,
   animationDuration = 20,
 }) => {
-  // Maintained brand: gold #CDB068, blue #1A323F, aqua #ABCBD1
+  // Maintained brand: #1A323F blue + #D0B675 gold only
   const defaultColors = {
     bg: "transparent",
-    c1: "oklch(72% 0.12 85)",   // warm gold
-    c2: "oklch(35% 0.05 220)",  // deep blue
-    c3: "oklch(78% 0.08 200)",  // aqua
+    c1: "oklch(27% 0.04 230)",  // #1A323F maintained blue
+    c2: "oklch(78% 0.10 85)",   // #D0B675 maintained gold
+    c3: "oklch(24% 0.035 230)", // darker blue
   }
 
   const finalColors = { ...defaultColors, ...colors }

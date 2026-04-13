@@ -1,26 +1,12 @@
 "use client";
 
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import TabBar from "@/components/ui/tab-bar";
+import TopBar from "@/components/ui/top-bar";
 import VoiceOverlay from "@/components/voice-overlay";
-
-function AnimatedMenuIcon({ isOpen, className = "w-5 h-5" }: { isOpen: boolean; className?: string }) {
-  return (
-    <div className={`${className} flex flex-col justify-center items-start gap-[5px]`}>
-      <span className={`block h-[1.5px] bg-current rounded-full transition-all duration-500 ease-[cubic-bezier(0.77,0,0.18,1)] origin-center ${
-        isOpen ? "w-[18px] translate-y-[6.5px] rotate-45" : "w-3"
-      }`} />
-      <span className={`block h-[1.5px] bg-current rounded-full transition-all duration-300 ease-[cubic-bezier(0.77,0,0.18,1)] ${
-        isOpen ? "w-[18px] opacity-0 translate-x-2" : "w-[18px] opacity-100"
-      }`} />
-      <span className={`block h-[1.5px] bg-current rounded-full transition-all duration-500 ease-[cubic-bezier(0.77,0,0.18,1)] origin-center ${
-        isOpen ? "w-[18px] -translate-y-[6.5px] -rotate-45" : "w-[18px]"
-      }`} />
-    </div>
-  );
-}
 
 function getGreeting() {
   const h = new Date().getHours();
@@ -32,7 +18,6 @@ function getGreeting() {
 export default function HomePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [menuOpen, setMenuOpen] = useState(false);
   const [voiceOpen, setVoiceOpen] = useState(false);
 
   useEffect(() => {
@@ -53,76 +38,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-brand-warm text-brand-black flex flex-col pb-28">
-      {/* Fullscreen menu */}
-      <div
-        className={`fixed inset-0 z-50 flex flex-col transition-all duration-600 ease-[cubic-bezier(0.77,0,0.18,1)] ${
-          menuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
-      >
-        <div className={`absolute inset-0 bg-brand-black transition-transform duration-600 ease-[cubic-bezier(0.77,0,0.18,1)] origin-top ${
-          menuOpen ? "scale-y-100" : "scale-y-0"
-        }`} />
-        <div className="relative z-10 h-[72px]" />
-        <div className="relative z-10 flex-1 flex flex-col justify-center px-10 max-w-sm mx-auto w-full">
-          <nav className="space-y-1">
-            {[
-              { href: "/", label: "Home", delay: 120 },
-              { href: "/services", label: "Services", delay: 170 },
-              { href: "/rewards", label: "Rewards", delay: 220 },
-              { href: "/properties", label: "Properties", delay: 270 },
-              { href: "/reports", label: "Reports", delay: 320 },
-              { href: "/settings", label: "Settings", delay: 370 },
-            ].map((item) => (
-              <a
-                key={item.label}
-                href={item.href}
-                onClick={() => setMenuOpen(false)}
-                className={`block px-4 py-3.5 rounded-2xl text-[22px] font-light tracking-wide text-white/50 hover:text-white hover:bg-white/[0.04] transition-all duration-500 ease-[cubic-bezier(0.77,0,0.18,1)] ${
-                  menuOpen ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
-                }`}
-                style={{ transitionDelay: menuOpen ? `${item.delay}ms` : "0ms" }}
-              >
-                {item.label}
-              </a>
-            ))}
-          </nav>
-        </div>
-        <div className={`relative z-10 px-10 pb-12 max-w-sm mx-auto w-full transition-all duration-500 ${
-          menuOpen ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
-        }`} style={{ transitionDelay: menuOpen ? "400ms" : "0ms" }}>
-          <div className="border-t border-white/[0.06] pt-5">
-            <p className="text-xs text-white/20 px-4 mb-3">{session.user?.email}</p>
-            <button
-              onClick={() => signOut()}
-              className="px-4 py-2 text-white/25 text-sm hover:text-white transition-colors"
-            >
-              Sign out
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Top bar: menu + logo + actions */}
-      <header className="relative z-[60] px-5 pt-12 pb-0 flex items-center justify-between">
-        <button
-          onClick={() => setMenuOpen(!menuOpen)}
-          className="w-9 h-9 flex items-center justify-center rounded-xl active:scale-95 transition-transform z-[60] relative"
-        >
-          <AnimatedMenuIcon isOpen={menuOpen} className={`w-5 h-5 transition-colors duration-500 ${menuOpen ? "text-white" : "text-brand-blue"}`} />
-        </button>
-        <img
-          src="/logo.svg"
-          alt="Maintained"
-          className={`h-[18px] transition-all duration-500 ${menuOpen ? "brightness-0 invert" : ""}`}
-          style={menuOpen ? undefined : { filter: "brightness(0) saturate(100%) invert(17%) sepia(20%) saturate(1200%) hue-rotate(160deg) brightness(95%) contrast(95%)" }}
-        />
-        <button className={`relative w-9 h-9 flex items-center justify-center rounded-xl active:scale-95 transition-all duration-500 ${menuOpen ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
-          <svg className="w-[18px] h-[18px] text-brand-blue/60" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
-          </svg>
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-brand-gold rounded-full" />
-        </button>
-      </header>
+      <TopBar />
 
       {/* Greeting */}
       <div className="px-6 pt-3 pb-2 animate-fade-slide-up">
@@ -133,7 +49,7 @@ export default function HomePage() {
       </div>
 
       {/* Cards */}
-      <div className="flex-1 px-5 pt-6 space-y-4 stagger">
+      <div className="flex-1 px-5 pt-4 space-y-4 stagger">
 
         {/* Home Status Score */}
         <div className="card">
@@ -143,10 +59,7 @@ export default function HomePage() {
                 <path d="M11.47 3.84a.75.75 0 011.06 0l8.69 8.69a.75.75 0 01-.53 1.28h-1.44v7.94a.75.75 0 01-.75.75h-3.75a.75.75 0 01-.75-.75V17.5a1.5 1.5 0 00-3 0v4.25a.75.75 0 01-.75.75H6.5a.75.75 0 01-.75-.75v-7.94H4.31a.75.75 0 01-.53-1.28l8.69-8.69z" />
               </svg>
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-[13px] font-semibold text-brand-black/70 tracking-wide">Home Status Score</span>
-              <span className="text-[9px] text-brand-black/30">TM</span>
-            </div>
+            <span className="text-[13px] font-semibold text-brand-black/70 tracking-wide">Home Status Score<sup className="text-[8px] text-brand-black/30 ml-0.5">TM</sup></span>
           </div>
 
           <div className="flex items-baseline gap-1.5 mb-4">
@@ -155,7 +68,6 @@ export default function HomePage() {
             <span className="text-[13px] text-brand-black/45 ml-3 font-medium">Performing Well</span>
           </div>
 
-          {/* Segmented progress */}
           <div className="flex gap-1 mb-2">
             <div className="flex-1 h-[6px] rounded-full overflow-hidden bg-brand-grey/60">
               <div className="h-full w-full bg-gradient-to-r from-brand-blue to-brand-blue/80 rounded-full" />
@@ -170,13 +82,13 @@ export default function HomePage() {
             <span>0</span><span>50</span><span>75</span><span>100</span>
           </div>
 
-          <button className="w-full py-3.5 rounded-2xl bg-brand-blue text-white text-[13px] font-semibold tracking-wide active:scale-[0.98] transition-transform">
+          <Link href="/rewards" className="block w-full py-3.5 rounded-2xl bg-brand-blue text-white text-[13px] font-semibold tracking-wide active:scale-[0.98] transition-transform text-center">
             Explore Benefits
-          </button>
+          </Link>
         </div>
 
         {/* Elite Tier */}
-        <div className="card card-pressed">
+        <Link href="/rewards" className="card card-pressed block">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <div className="w-9 h-9 rounded-xl bg-brand-gold/10 flex items-center justify-center">
@@ -194,12 +106,12 @@ export default function HomePage() {
             </svg>
           </div>
           <div className="mt-4 relative h-[6px] rounded-full bg-brand-grey/50 overflow-hidden">
-            <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-brand-gold/70 to-brand-gold rounded-full transition-all duration-1000" style={{ width: "72%" }} />
+            <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-brand-gold/70 to-brand-gold rounded-full" style={{ width: "72%" }} />
           </div>
-        </div>
+        </Link>
 
         {/* Nearest Property */}
-        <div className="card card-pressed">
+        <Link href="/properties" className="card card-pressed block">
           <p className="text-[11px] text-brand-black/35 font-medium uppercase tracking-wider mb-2">Nearest Property</p>
           <div className="flex items-center justify-between">
             <div>
@@ -218,37 +130,34 @@ export default function HomePage() {
               </svg>
             </div>
           </div>
-        </div>
+        </Link>
 
         {/* Maintain Your Home */}
         <div>
           <h3 className="text-[13px] font-semibold text-brand-black/50 uppercase tracking-wider mb-4 px-1">Maintain Your Home</h3>
           <div className="flex gap-5 overflow-x-auto pb-3 -mx-1 px-1 scrollbar-hide">
             {[
-              { label: "Plumbing", gradient: "from-brand-blue/[0.08] to-brand-aqua/[0.12]" },
-              { label: "Electrical", gradient: "from-brand-gold/[0.12] to-brand-gold/[0.05]" },
-              { label: "Cleaning", gradient: "from-brand-aqua/[0.12] to-brand-blue/[0.06]" },
-              { label: "AC Service", gradient: "from-brand-blue/[0.06] to-brand-aqua/[0.08]" },
-              { label: "Painting", gradient: "from-brand-gold/[0.08] to-brand-cream" },
+              { label: "Plumbing", gradient: "from-brand-blue/[0.08] to-brand-aqua/[0.12]", icon: "M11.42 15.17l-5.84-3.38a1 1 0 01-.08-1.69l9.82-5.72a1 1 0 011.34.47l3.54 7.08a1 1 0 01-.47 1.34l-9.82 5.72a1 1 0 01-1.34-.47z" },
+              { label: "Electrical", gradient: "from-brand-gold/[0.12] to-brand-gold/[0.05]", icon: "M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" },
+              { label: "Cleaning", gradient: "from-brand-aqua/[0.12] to-brand-blue/[0.06]", icon: "M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" },
+              { label: "AC Service", gradient: "from-brand-blue/[0.06] to-brand-aqua/[0.08]", icon: "M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" },
+              { label: "Painting", gradient: "from-brand-gold/[0.08] to-brand-cream", icon: "M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128z" },
             ].map((item) => (
-              <button key={item.label} className="flex flex-col items-center gap-2.5 shrink-0 active:scale-95 transition-transform">
+              <Link key={item.label} href="/services" className="flex flex-col items-center gap-2.5 shrink-0 active:scale-95 transition-transform">
                 <div className={`w-[72px] h-[72px] rounded-full bg-gradient-to-br ${item.gradient} flex items-center justify-center shadow-sm shadow-black/[0.02]`}>
                   <svg className="w-6 h-6 text-brand-blue/40" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M11.42 15.17l-5.84-3.38a1 1 0 01-.08-1.69l9.82-5.72a1 1 0 011.34.47l3.54 7.08a1 1 0 01-.47 1.34l-9.82 5.72a1 1 0 01-1.34-.47z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
                   </svg>
                 </div>
                 <span className="text-[11px] text-brand-black/50 font-medium">{item.label}</span>
-              </button>
+              </Link>
             ))}
           </div>
         </div>
 
       </div>
 
-      {/* Voice overlay */}
       <VoiceOverlay isOpen={voiceOpen} onClose={() => setVoiceOpen(false)} />
-
-      {/* Tab bar */}
       <TabBar onOrbPress={() => setVoiceOpen(true)} isListening={false} isProcessing={false} />
     </div>
   );

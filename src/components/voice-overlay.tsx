@@ -114,10 +114,10 @@ export default function VoiceOverlay({ isOpen, onClose }: VoiceOverlayProps) {
   }
 
   const orbColors = isListening
-    ? { c1: "oklch(80% 0.10 200)", c2: "oklch(78% 0.12 195)", c3: "oklch(85% 0.08 190)" }
+    ? { c1: "oklch(30% 0.045 230)", c2: "oklch(82% 0.12 85)", c3: "oklch(27% 0.04 230)" }
     : isProcessing
-    ? { c1: "oklch(75% 0.14 85)", c2: "oklch(40% 0.06 220)", c3: "oklch(70% 0.12 75)" }
-    : { c1: "oklch(72% 0.12 85)", c2: "oklch(35% 0.05 220)", c3: "oklch(78% 0.08 200)" };
+    ? { c1: "oklch(27% 0.04 230)", c2: "oklch(80% 0.13 85)", c3: "oklch(25% 0.035 230)" }
+    : { c1: "oklch(27% 0.04 230)", c2: "oklch(78% 0.10 85)", c3: "oklch(24% 0.035 230)" };
 
   const orbSpeed = isListening ? 4 : isProcessing ? 8 : 20;
   const hasConversation = conversation.length > 0;

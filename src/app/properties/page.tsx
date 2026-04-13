@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import TabBar from "@/components/ui/tab-bar";
+import TopBar from "@/components/ui/top-bar";
 import VoiceOverlay from "@/components/voice-overlay";
 
 interface Property {
@@ -242,10 +243,8 @@ export default function PropertiesPage() {
   // Properties list view
   return (
     <div className="min-h-screen bg-brand-warm text-brand-black flex flex-col pb-28">
-      <div className="flex items-center justify-center pt-12 pb-0">
-        <img src="/logo.svg" alt="Maintained" className="h-[18px]" style={{ filter: "brightness(0) saturate(100%) invert(17%) sepia(20%) saturate(1200%) hue-rotate(160deg) brightness(95%) contrast(95%)" }} />
-      </div>
-      <header className="px-6 pt-3 pb-2 flex items-start justify-between">
+      <TopBar />
+      <header className="px-6 pt-2 pb-2 flex items-start justify-between">
         <div>
           <p className="text-[11px] text-brand-black/35 font-medium uppercase tracking-widest">Portfolio</p>
           <h1 className="text-[26px] font-semibold tracking-tight mt-1">Properties</h1>

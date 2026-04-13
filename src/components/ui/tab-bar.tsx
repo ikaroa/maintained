@@ -66,10 +66,10 @@ export default function TabBar({ onOrbPress, isListening, isProcessing }: TabBar
   const pathname = usePathname();
 
   const orbColors = isListening
-    ? { c1: "oklch(80% 0.10 200)", c2: "oklch(78% 0.12 195)", c3: "oklch(85% 0.08 190)" }
+    ? { c1: "oklch(30% 0.045 230)", c2: "oklch(82% 0.12 85)", c3: "oklch(27% 0.04 230)" }   // #1A323F + brighter #D0B675
     : isProcessing
-    ? { c1: "oklch(75% 0.14 85)", c2: "oklch(40% 0.06 220)", c3: "oklch(70% 0.12 75)" }
-    : { c1: "oklch(72% 0.12 85)", c2: "oklch(35% 0.05 220)", c3: "oklch(78% 0.08 200)" };
+    ? { c1: "oklch(27% 0.04 230)", c2: "oklch(80% 0.13 85)", c3: "oklch(25% 0.035 230)" }   // blue + gold pulse
+    : { c1: "oklch(27% 0.04 230)", c2: "oklch(78% 0.10 85)", c3: "oklch(24% 0.035 230)" };  // #1A323F + #D0B675
 
   const orbSpeed = isListening ? 4 : isProcessing ? 8 : 20;
 
@@ -99,13 +99,14 @@ export default function TabBar({ onOrbPress, isListening, isProcessing }: TabBar
           onClick={onOrbPress}
           className="relative active:scale-90 transition-transform duration-200"
         >
-          <div className={`absolute -inset-1 rounded-full transition-all duration-500 ${
-            isListening ? "bg-brand-aqua/20 blur-lg opacity-100" : "opacity-0"
+          <div className={`absolute -inset-2 rounded-full transition-all duration-500 blur-xl ${
+            isListening ? "bg-brand-aqua/20 opacity-100" : "bg-brand-blue/10 opacity-60"
           }`} />
-          <div className="absolute -inset-[2px] rounded-full bg-white shadow-md shadow-brand-black/8" />
-          <div className="relative rounded-full overflow-hidden">
+          <div className="absolute -inset-[3px] rounded-full bg-gradient-to-b from-white/80 to-white/40 shadow-[0_2px_8px_rgba(26,50,63,0.15),0_1px_2px_rgba(26,50,63,0.1)]" />
+          <div className="absolute -inset-[1px] rounded-full bg-gradient-to-b from-white/30 to-transparent" />
+          <div className="relative rounded-full overflow-hidden shadow-inner">
             <SiriOrb
-              size="48px"
+              size="55px"
               colors={orbColors}
               animationDuration={orbSpeed}
             />

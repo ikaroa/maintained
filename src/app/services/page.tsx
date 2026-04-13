@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import TabBar from "@/components/ui/tab-bar";
+import TopBar from "@/components/ui/top-bar";
 import VoiceOverlay from "@/components/voice-overlay";
 
 interface TimeSlot {
@@ -321,10 +322,8 @@ export default function ServicesPage() {
   // Main services view
   return (
     <div className="min-h-screen bg-brand-warm text-brand-black flex flex-col pb-28">
-      <div className="flex items-center justify-center pt-12 pb-0">
-        <img src="/logo.svg" alt="Maintained" className="h-[18px]" style={{ filter: "brightness(0) saturate(100%) invert(17%) sepia(20%) saturate(1200%) hue-rotate(160deg) brightness(95%) contrast(95%)" }} />
-      </div>
-      <header className="px-6 pt-3 pb-3">
+      <TopBar />
+      <header className="px-6 pt-2 pb-3">
         <h1 className="text-[26px] font-semibold tracking-tight">Services</h1>
       </header>
 
