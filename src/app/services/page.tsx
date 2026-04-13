@@ -1,9 +1,8 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState, Suspense } from "react";
 import TabBar from "@/components/ui/tab-bar";
 import TopBar from "@/components/ui/top-bar";
 import VoiceOverlay from "@/components/voice-overlay";
@@ -65,6 +64,14 @@ const mockBookings: Booking[] = [
 ];
 
 export default function ServicesPage() {
+  return (
+    <Suspense>
+      <ServicesContent />
+    </Suspense>
+  );
+}
+
+function ServicesContent() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();

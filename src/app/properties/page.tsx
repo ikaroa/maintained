@@ -33,7 +33,7 @@ interface Property {
   }[];
 }
 
-const properties: Property[] = [
+const initialProperties: Property[] = [
   {
     id: "1",
     name: "Marina Residence Tower 1",
@@ -78,6 +78,20 @@ const properties: Property[] = [
   },
 ];
 
+const UNSPLASH_IMAGES = [
+  "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80",
+  "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80",
+  "https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=800&q=80",
+  "https://images.unsplash.com/photo-1560185127-6ed189bf02f4?w=800&q=80",
+  "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80",
+  "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80",
+  "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80",
+  "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&q=80",
+];
+
+const AREAS = ["Dubai Marina", "Downtown Dubai", "JBR", "JGE", "Palm Jumeirah", "Business Bay"];
+const TYPES = ["Apartment", "Villa", "Townhouse", "Penthouse"];
+
 function StatusBadge({ status }: { status: string }) {
   const colors: Record<string, string> = {
     Active: "bg-brand-blue/[0.06] text-brand-blue",
@@ -121,11 +135,64 @@ export default function PropertiesPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [voiceOpen, setVoiceOpen] = useState(false);
+  const [properties, setProperties] = useState<Property[]>(initialProperties);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [expandedReport, setExpandedReport] = useState<string | null>(null);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  // Add form state
+  const [formName, setFormName] = useState("");
+  const [formUnit, setFormUnit] = useState("");
+  const [formArea, setFormArea] = useState(AREAS[0]);
+  const [formType, setFormType] = useState(TYPES[0]);
+  const [formBedrooms, setFormBedrooms] = useState(1);
+  const [formBathrooms, setFormBathrooms] = useState(1);
+  const [formSqft, setFormSqft] = useState("");
 
   useEffect(() => { if (status === "unauthenticated") router.push("/login"); }, [status, router]);
   if (status === "loading" || !session) return null;
+
+  function resetForm() {
+    setFormName("");
+    setFormUnit("");
+    setFormArea(AREAS[0]);
+    setFormType(TYPES[0]);
+    setFormBedrooms(1);
+    setFormBathrooms(1);
+    setFormSqft("");
+  }
+
+  function handleAddProperty() {
+    if (!formName.trim() || !formUnit.trim() || !formSqft.trim()) return;
+
+    const newProperty: Property = {
+      id: Date.now().toString(),
+      name: formName.trim(),
+      unit: formUnit.trim(),
+      image: UNSPLASH_IMAGES[Math.floor(Math.random() * UNSPLASH_IMAGES.length)],
+      status: "Active",
+      score: 50,
+      type: formType,
+      area: formArea,
+      bedrooms: formBedrooms,
+      bathrooms: formBathrooms,
+      sqft: parseInt(formSqft) || 0,
+      lastInspection: "—",
+      nextService: "—",
+      reports: [],
+    };
+
+    setProperties((prev) => [newProperty, ...prev]);
+    resetForm();
+    setShowAddForm(false);
+  }
+
+  function handleDeleteProperty(id: string) {
+    setProperties((prev) => prev.filter((p) => p.id !== id));
+    setSelectedProperty(null);
+    setShowDeleteConfirm(false);
+  }
 
   // Property detail view
   if (selectedProperty) {
@@ -137,7 +204,7 @@ export default function PropertiesPage() {
           <img src={p.image} alt={p.name} className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-brand-black/60 via-transparent to-brand-black/20" />
           <button
-            onClick={() => setSelectedProperty(null)}
+            onClick={() => { setSelectedProperty(null); setShowDeleteConfirm(false); }}
             className="absolute top-14 left-5 w-10 h-10 rounded-2xl bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-lg active:scale-95 transition-transform"
           >
             <svg className="w-5 h-5 text-brand-black/70" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
@@ -235,6 +302,37 @@ export default function PropertiesPage() {
               ))}
             </div>
           </div>
+
+          {/* Delete property */}
+          <div className="pt-2 pb-4">
+            {!showDeleteConfirm ? (
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className="w-full text-center text-[14px] font-semibold text-red-500 py-3 active:opacity-60 transition-opacity"
+              >
+                Delete Property
+              </button>
+            ) : (
+              <div className="card border border-red-200 bg-red-50/50">
+                <p className="text-[13px] font-semibold text-red-600 text-center mb-1">Delete this property?</p>
+                <p className="text-[12px] text-red-400 text-center mb-4">This action cannot be undone.</p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setShowDeleteConfirm(false)}
+                    className="flex-1 py-2.5 rounded-2xl bg-brand-black/[0.06] text-[13px] font-semibold text-brand-black/60 active:scale-95 transition-transform"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => handleDeleteProperty(p.id)}
+                    className="flex-1 py-2.5 rounded-2xl bg-red-500 text-[13px] font-semibold text-white active:scale-95 transition-transform"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -249,7 +347,10 @@ export default function PropertiesPage() {
           <p className="text-[11px] text-brand-black/35 font-medium uppercase tracking-widest">Portfolio</p>
           <h1 className="text-[26px] font-semibold tracking-tight mt-1">Properties</h1>
         </div>
-        <button className="mt-2 w-10 h-10 rounded-2xl bg-brand-blue flex items-center justify-center shadow-lg shadow-brand-blue/20 active:scale-95 transition-transform">
+        <button
+          onClick={() => setShowAddForm(true)}
+          className="mt-2 w-10 h-10 rounded-2xl bg-brand-blue flex items-center justify-center shadow-lg shadow-brand-blue/20 active:scale-95 transition-transform"
+        >
           <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
@@ -305,6 +406,163 @@ export default function PropertiesPage() {
             </div>
           </button>
         ))}
+      </div>
+
+      {/* Add Property slide-up overlay */}
+      <div
+        className={`fixed inset-0 z-50 transition-opacity duration-300 ${showAddForm ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+      >
+        {/* Backdrop */}
+        <div
+          className="absolute inset-0 bg-brand-black/40 backdrop-blur-sm"
+          onClick={() => { setShowAddForm(false); resetForm(); }}
+        />
+
+        {/* Sheet */}
+        <div
+          className={`absolute bottom-0 left-0 right-0 bg-brand-warm rounded-t-3xl transition-transform duration-400 ease-out ${showAddForm ? "translate-y-0" : "translate-y-full"}`}
+          style={{ maxHeight: "92vh" }}
+        >
+          <div className="overflow-y-auto" style={{ maxHeight: "92vh" }}>
+            {/* Handle */}
+            <div className="flex justify-center pt-3 pb-1">
+              <div className="w-10 h-1 rounded-full bg-brand-black/10" />
+            </div>
+
+            <div className="px-6 pt-2 pb-8">
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="text-[20px] font-semibold tracking-tight">Add Property</h2>
+                <button
+                  onClick={() => { setShowAddForm(false); resetForm(); }}
+                  className="w-8 h-8 rounded-xl bg-brand-black/[0.06] flex items-center justify-center active:scale-95 transition-transform"
+                >
+                  <svg className="w-4 h-4 text-brand-black/40" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                {/* Property Name */}
+                <div>
+                  <label className="text-[11px] text-brand-black/35 font-medium uppercase tracking-widest">Property Name</label>
+                  <input
+                    type="text"
+                    value={formName}
+                    onChange={(e) => setFormName(e.target.value)}
+                    placeholder="e.g. Marina Residence Tower 1"
+                    className="mt-1.5 w-full px-4 py-3 rounded-2xl bg-white border border-brand-black/[0.06] text-[14px] text-brand-black placeholder:text-brand-black/25 focus:outline-none focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue/30 transition-all"
+                  />
+                </div>
+
+                {/* Unit Number */}
+                <div>
+                  <label className="text-[11px] text-brand-black/35 font-medium uppercase tracking-widest">Unit Number</label>
+                  <input
+                    type="text"
+                    value={formUnit}
+                    onChange={(e) => setFormUnit(e.target.value)}
+                    placeholder="e.g. Unit 1204"
+                    className="mt-1.5 w-full px-4 py-3 rounded-2xl bg-white border border-brand-black/[0.06] text-[14px] text-brand-black placeholder:text-brand-black/25 focus:outline-none focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue/30 transition-all"
+                  />
+                </div>
+
+                {/* Area */}
+                <div>
+                  <label className="text-[11px] text-brand-black/35 font-medium uppercase tracking-widest">Area</label>
+                  <select
+                    value={formArea}
+                    onChange={(e) => setFormArea(e.target.value)}
+                    className="mt-1.5 w-full px-4 py-3 rounded-2xl bg-white border border-brand-black/[0.06] text-[14px] text-brand-black focus:outline-none focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue/30 transition-all appearance-none"
+                  >
+                    {AREAS.map((a) => (
+                      <option key={a} value={a}>{a}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Type */}
+                <div>
+                  <label className="text-[11px] text-brand-black/35 font-medium uppercase tracking-widest">Type</label>
+                  <select
+                    value={formType}
+                    onChange={(e) => setFormType(e.target.value)}
+                    className="mt-1.5 w-full px-4 py-3 rounded-2xl bg-white border border-brand-black/[0.06] text-[14px] text-brand-black focus:outline-none focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue/30 transition-all appearance-none"
+                  >
+                    {TYPES.map((t) => (
+                      <option key={t} value={t}>{t}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Bedrooms stepper */}
+                <div>
+                  <label className="text-[11px] text-brand-black/35 font-medium uppercase tracking-widest">Bedrooms</label>
+                  <div className="mt-1.5 flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setFormBedrooms(Math.max(1, formBedrooms - 1))}
+                      className="w-10 h-10 rounded-2xl bg-white border border-brand-black/[0.06] flex items-center justify-center text-[18px] font-medium text-brand-black/50 active:scale-95 transition-transform"
+                    >
+                      -
+                    </button>
+                    <span className="w-10 text-center text-[16px] font-semibold">{formBedrooms}</span>
+                    <button
+                      type="button"
+                      onClick={() => setFormBedrooms(Math.min(6, formBedrooms + 1))}
+                      className="w-10 h-10 rounded-2xl bg-white border border-brand-black/[0.06] flex items-center justify-center text-[18px] font-medium text-brand-black/50 active:scale-95 transition-transform"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+
+                {/* Bathrooms stepper */}
+                <div>
+                  <label className="text-[11px] text-brand-black/35 font-medium uppercase tracking-widest">Bathrooms</label>
+                  <div className="mt-1.5 flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setFormBathrooms(Math.max(1, formBathrooms - 1))}
+                      className="w-10 h-10 rounded-2xl bg-white border border-brand-black/[0.06] flex items-center justify-center text-[18px] font-medium text-brand-black/50 active:scale-95 transition-transform"
+                    >
+                      -
+                    </button>
+                    <span className="w-10 text-center text-[16px] font-semibold">{formBathrooms}</span>
+                    <button
+                      type="button"
+                      onClick={() => setFormBathrooms(Math.min(6, formBathrooms + 1))}
+                      className="w-10 h-10 rounded-2xl bg-white border border-brand-black/[0.06] flex items-center justify-center text-[18px] font-medium text-brand-black/50 active:scale-95 transition-transform"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+
+                {/* Sqft */}
+                <div>
+                  <label className="text-[11px] text-brand-black/35 font-medium uppercase tracking-widest">Size (sqft)</label>
+                  <input
+                    type="number"
+                    value={formSqft}
+                    onChange={(e) => setFormSqft(e.target.value)}
+                    placeholder="e.g. 1450"
+                    className="mt-1.5 w-full px-4 py-3 rounded-2xl bg-white border border-brand-black/[0.06] text-[14px] text-brand-black placeholder:text-brand-black/25 focus:outline-none focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue/30 transition-all"
+                  />
+                </div>
+
+                {/* Submit */}
+                <button
+                  onClick={handleAddProperty}
+                  disabled={!formName.trim() || !formUnit.trim() || !formSqft.trim()}
+                  className="w-full mt-2 py-3.5 rounded-2xl bg-brand-blue text-white text-[15px] font-semibold shadow-lg shadow-brand-blue/20 active:scale-[0.98] transition-all disabled:opacity-40 disabled:active:scale-100"
+                >
+                  Add Property
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <VoiceOverlay isOpen={voiceOpen} onClose={() => setVoiceOpen(false)} />

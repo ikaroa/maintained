@@ -48,8 +48,8 @@ export default function ReportsPage() {
 
   if (status === "loading" || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-brand-black">
-        <div className="text-white">Loading reports...</div>
+      <div className="min-h-screen flex items-center justify-center bg-brand-warm">
+        <div className="text-brand-black/30">Loading reports...</div>
       </div>
     );
   }
@@ -57,28 +57,26 @@ export default function ReportsPage() {
   if (!session) return null;
 
   return (
-    <div className="min-h-screen bg-brand-black text-white">
-      <header className="border-b border-brand-blue px-6 py-4 flex items-center justify-between">
-        <div>
-          <img src="/logo.svg" alt="Maintained" className="h-6 brightness-0 invert" />
-        </div>
-        <div className="flex items-center gap-4">
-          <a href="/" className="text-sm text-gray-400 hover:text-white transition-colors">
-            Voice Assistant
-          </a>
-          <button
-            onClick={generateReport}
-            className="text-sm bg-brand-gold hover:bg-brand-gold/80 px-3 py-1.5 rounded-lg transition-colors"
-          >
-            Generate Report
-          </button>
-        </div>
+    <div className="min-h-screen bg-brand-warm text-brand-black">
+      <header className="px-5 pt-3 pb-3 flex items-center justify-between">
+        <button onClick={() => router.back()} className="w-9 h-9 flex items-center justify-center rounded-xl active:scale-95 transition-transform">
+          <svg className="w-5 h-5 text-brand-black/50" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+          </svg>
+        </button>
+        <img src="/logo.svg" alt="Maintained" className="h-[18px]" style={{ filter: "brightness(0) saturate(100%) invert(17%) sepia(20%) saturate(1200%) hue-rotate(160deg) brightness(95%) contrast(95%)" }} />
+        <button
+          onClick={generateReport}
+          className="text-[12px] bg-brand-blue text-white px-3 py-1.5 rounded-xl font-semibold active:scale-95 transition-transform"
+        >
+          Generate
+        </button>
       </header>
 
       <div className="max-w-6xl mx-auto px-6 py-8">
         {reports.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-gray-400 text-lg">No reports yet.</p>
+            <p className="text-brand-black/40 text-lg">No reports yet.</p>
             <p className="text-gray-500 mt-2">Reports are generated daily based on voice assistant usage.</p>
           </div>
         ) : (
@@ -106,10 +104,10 @@ export default function ReportsPage() {
             )}
 
             {/* Reports Table */}
-            <div className="bg-brand-blue/40 rounded-xl border border-brand-blue overflow-hidden">
+            <div className="bg-white rounded-xl border border-brand-black/[0.04] overflow-hidden">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-brand-blue text-gray-400">
+                  <tr className="border-b border-brand-black/[0.04] text-brand-black/40">
                     <th className="px-6 py-3 text-left">Date</th>
                     <th className="px-6 py-3 text-right">Queries</th>
                     <th className="px-6 py-3 text-right">Users</th>
@@ -128,7 +126,7 @@ export default function ReportsPage() {
                       }
                     })();
                     return (
-                      <tr key={report.id} className="border-b border-brand-blue/50 hover:bg-gray-800/30">
+                      <tr key={report.id} className="border-b border-brand-black/[0.04]/50 hover:bg-gray-800/30">
                         <td className="px-6 py-3">
                           {new Date(report.date).toLocaleDateString("en-GB", {
                             weekday: "short",
@@ -162,8 +160,8 @@ export default function ReportsPage() {
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-brand-blue/40 rounded-xl border border-brand-blue p-6">
-      <p className="text-sm text-gray-400">{label}</p>
+    <div className="bg-white rounded-xl border border-brand-black/[0.04] p-6">
+      <p className="text-sm text-brand-black/40">{label}</p>
       <p className="text-2xl font-bold mt-1">{value}</p>
     </div>
   );
