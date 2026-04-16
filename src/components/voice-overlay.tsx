@@ -60,15 +60,17 @@ export default function VoiceOverlay({ isOpen, onClose }: VoiceOverlayProps) {
     } catch { return {}; }
   };
 
-  // Auto-listen when overlay opens
+  // Auto-listen when overlay first opens (only if no conversation yet)
+  const prevOpenRef = useRef(false);
   useEffect(() => {
-    if (isOpen && conversation.length === 0) {
+    if (isOpen && !prevOpenRef.current && conversation.length === 0) {
       const settings = getSettings();
       if (settings.autoListen !== false) {
         const timer = setTimeout(() => startListening(), 500);
         return () => clearTimeout(timer);
       }
     }
+    prevOpenRef.current = isOpen;
   }, [isOpen]);
 
   const startListening = useCallback(async () => {
@@ -185,19 +187,26 @@ export default function VoiceOverlay({ isOpen, onClose }: VoiceOverlayProps) {
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex flex-col transition-all duration-500 ease-[cubic-bezier(0.77,0,0.18,1)] ${
+      className={`fixed inset-0 z-[100] flex flex-col transition-all duration-500 ease-[cubic-bezier(0.77,0,0.18,1)] ${
         isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
       }`}
     >
-      <div className={`absolute inset-0 bg-brand-black transition-transform duration-500 ease-[cubic-bezier(0.77,0,0.18,1)] origin-bottom ${
-        isOpen ? "scale-y-100" : "scale-y-0"
-      }`} />
+      {/* Fully opaque background */}
+      <div className="absolute inset-0 bg-brand-black" />
 
       {/* Header */}
       <div className={`relative z-10 px-5 pt-3 pb-0 flex items-center justify-between transition-all duration-500 delay-100 ${
         isOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
       }`}>
-        <button onClick={onClose} className="w-9 h-9 flex items-center justify-center rounded-xl text-white/50 hover:text-white transition-colors active:scale-95">
+        <button onClick={(e) => {
+          e.stopPropagation();
+          if (mediaRecorderRef.current && isListening) {
+            mediaRecorderRef.current.stop();
+            setIsListening(false);
+          }
+          window.speechSynthesis.cancel();
+          onClose();
+        }} className="w-9 h-9 flex items-center justify-center rounded-xl text-white/50 hover:text-white transition-colors active:scale-95">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
             <path strokeLinecap="round" d="M19 12H5m7-7l-7 7 7 7" />
           </svg>
