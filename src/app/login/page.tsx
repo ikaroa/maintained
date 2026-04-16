@@ -150,7 +150,7 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="text-center mb-10">
           <img
-            src="/logo.svg"
+            src={phase === "landing" ? "/logo-grey.png" : "/logo-grey.png"}
             alt="Maintained"
             className={`mx-auto brightness-0 invert transition-all duration-700 ${
               showForm ? "h-8" : "h-11"

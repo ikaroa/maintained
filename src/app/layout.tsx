@@ -16,8 +16,18 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MAINTAINED - AI Voice Assistant",
-  description: "AI-Powered Asset Maintenance Voice Assistant | Beyond Maintenance",
+  title: "MAINTAINED",
+  description: "Beyond Maintenance",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "MAINTAINED",
+  },
+  icons: {
+    icon: "/icon-192.png",
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export default function RootLayout({

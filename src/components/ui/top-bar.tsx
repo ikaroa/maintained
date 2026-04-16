@@ -148,10 +148,9 @@ export default function TopBar() {
           <AnimatedMenuIcon isOpen={menuOpen} />
         </button>
         <img
-          src="/logo.svg"
+          src={menuOpen ? "/logo-grey.png" : "/logo-blue.png"}
           alt="Maintained"
-          className={`h-[18px] transition-all duration-500 ${menuOpen ? "brightness-0 invert" : ""}`}
-          style={menuOpen ? undefined : { filter: "brightness(0) saturate(100%) invert(17%) sepia(20%) saturate(1200%) hue-rotate(160deg) brightness(95%) contrast(95%)" }}
+          className="h-[18px] transition-all duration-500"
         />
         <button
           onClick={() => { setNotifOpen(!notifOpen); setMenuOpen(false); }}

@@ -27,7 +27,7 @@ export default function HomePage() {
   if (status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-brand-cream">
-        <img src="/logo.svg" alt="Maintained" className="h-8 opacity-30 animate-pulse" />
+        <img src="/logo-blue.png" alt="Maintained" className="h-8 opacity-30 animate-pulse" />
       </div>
     );
   }

@@ -64,7 +64,7 @@ export default function ReportsPage() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
           </svg>
         </button>
-        <img src="/logo.svg" alt="Maintained" className="h-[18px]" style={{ filter: "brightness(0) saturate(100%) invert(17%) sepia(20%) saturate(1200%) hue-rotate(160deg) brightness(95%) contrast(95%)" }} />
+        <img src="/logo-blue.png" alt="Maintained" className="h-[18px]" />
         <button
           onClick={generateReport}
           className="text-[12px] bg-brand-blue text-white px-3 py-1.5 rounded-xl font-semibold active:scale-95 transition-transform"
