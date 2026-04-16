@@ -7,7 +7,11 @@
 import OpenAI from "openai";
 import { resolveQuery } from "./joblogic";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+let _openai: OpenAI | null = null;
+function getOpenAI(): OpenAI {
+  if (!_openai) _openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  return _openai;
+}
 
 interface ParsedIntent {
   intent: string;
@@ -49,7 +53,7 @@ Respond with JSON only:
 }`;
 
 export async function parseIntent(userQuery: string): Promise<ParsedIntent> {
-  const response = await openai.chat.completions.create({
+  const response = await getOpenAI().chat.completions.create({
     model: "gpt-4o-mini",
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
@@ -72,7 +76,7 @@ export async function generateResponse(
   data: unknown,
   intent: string
 ): Promise<string> {
-  const response = await openai.chat.completions.create({
+  const response = await getOpenAI().chat.completions.create({
     model: "gpt-4o-mini",
     messages: [
       {
@@ -158,7 +162,7 @@ export async function transcribeAudio(audioBuffer: Buffer, mimeType: string = "a
   const uint8 = new Uint8Array(audioBuffer);
   const file = new File([uint8], `audio.${ext}`, { type: mimeType });
 
-  const transcription = await openai.audio.transcriptions.create({
+  const transcription = await getOpenAI().audio.transcriptions.create({
     model: "whisper-1",
     file,
     language: "en",
@@ -171,7 +175,7 @@ export async function transcribeAudio(audioBuffer: Buffer, mimeType: string = "a
  * Generate speech from text using OpenAI TTS
  */
 export async function textToSpeech(text: string): Promise<Buffer> {
-  const response = await openai.audio.speech.create({
+  const response = await getOpenAI().audio.speech.create({
     model: "tts-1",
     voice: "alloy",
     input: text,
